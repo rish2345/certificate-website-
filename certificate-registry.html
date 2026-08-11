@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Certificate Registry</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,500;0,600;1,500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-950:#0b1119;
+    --navy-900:#101825;
+    --navy-800:#182234;
+    --panel-line:#2a3547;
+    --parchment:#f1ece0;
+    --parchment-dim:#e6ded0;
+    --ink:#1c2130;
+    --ink-soft:#5c5748;
+    --brass:#b4914f;
+    --brass-bright:#d4b06e;
+    --brass-dim:#7d6636;
+    --ivory-text:#e9e4d6;
+    --ivory-dim:#8d9199;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+
+  html{scroll-behavior:smooth;}
+
+  body{
+    background:var(--navy-950);
+    color:var(--ivory-text);
+    font-family:'IBM Plex Sans',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  ::selection{background:var(--brass-dim);color:#fff;}
+
+  a{color:inherit;}
+
+  /* ---------- faint vault-wall texture ---------- */
+  body::before{
+    content:"";
+    position:fixed;inset:0;
+    background-image:
+      repeating-linear-gradient(180deg, rgba(212,176,110,0.025) 0px, rgba(212,176,110,0.025) 1px, transparent 1px, transparent 96px),
+      radial-gradient(circle at 15% 10%, rgba(212,176,110,0.05) 0, transparent 45%);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .wrap{max-width:1140px;margin:0 auto;padding:0 40px;position:relative;z-index:1;}
+
+  :focus-visible{outline:2px solid var(--brass-bright);outline-offset:3px;}
+
+  /* ---------- HERO ---------- */
+  header.hero{
+    padding:104px 0 76px;
+    border-bottom:1px solid var(--panel-line);
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:40px;
+    align-items:end;
+  }
+  .hero-left .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px;
+    letter-spacing:0.24em;
+    text-transform:uppercase;
+    color:var(--brass-bright);
+    margin-bottom:26px;
+    display:flex;align-items:center;gap:12px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:8px;height:8px;
+    border:1px solid var(--brass-bright);
+    border-radius:50%;
+    display:inline-block;
+  }
+  h1.title{
+    font-family:'Newsreader',serif;
+    font-weight:600;
+    font-size:clamp(48px,6.4vw,84px);
+    line-height:1.02;
+    letter-spacing:-0.01em;
+    color:var(--ivory-text);
+  }
+  h1.title em{
+    font-style:italic;
+    font-weight:500;
+    color:var(--brass-bright);
+  }
+  .subtitle{
+    margin-top:24px;
+    max-width:460px;
+    font-size:15.5px;
+    line-height:1.65;
+    color:var(--ivory-dim);
+  }
+
+  /* ---------- registry seal (signature element) ---------- */
+  .registry-seal{width:132px;height:132px;flex-shrink:0;}
+  .registry-seal svg{width:100%;height:100%;}
+  .registry-seal .ring{fill:none;stroke:var(--brass);stroke-width:1;}
+  .registry-seal .ring-dash{fill:none;stroke:var(--brass-dim);stroke-width:1;stroke-dasharray:1.5 3.4;}
+  .registry-seal text{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:5.6px;
+    letter-spacing:2.6px;
+    fill:var(--brass-bright);
+  }
+  .registry-seal .seal-mark{
+    font-family:'Newsreader',serif;
+    font-style:italic;
+    font-size:19px;
+    fill:var(--ivory-text);
+  }
+
+  .ledger-count{
+    margin-top:52px;
+    display:flex;
+    border-top:1px solid var(--panel-line);
+  }
+  .ledger-item{
+    flex:1;
+    padding:18px 24px 0 0;
+    border-right:1px solid var(--panel-line);
+  }
+  .ledger-item:last-child{border-right:none;}
+  .ledger-num{
+    font-family:'Newsreader',serif;
+    font-size:38px;
+    font-weight:600;
+    color:var(--ivory-text);
+  }
+  .ledger-label{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--ivory-dim);
+    margin-top:5px;
+  }
+
+  /* ---------- SECTION LABELS ---------- */
+  .section{padding:88px 0;}
+  .section-head{
+    display:flex;
+    align-items:baseline;
+    gap:18px;
+    margin-bottom:48px;
+    padding-bottom:20px;
+    border-bottom:1px solid var(--panel-line);
+  }
+  .section-head .part{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:var(--brass-bright);
+    letter-spacing:0.1em;
+  }
+  .section-head h2{
+    font-family:'Newsreader',serif;
+    font-weight:600;
+    font-style:italic;
+    font-size:32px;
+    color:var(--ivory-text);
+  }
+  .section-head .count{
+    margin-left:auto;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px;
+    letter-spacing:0.1em;
+    color:var(--ivory-dim);
+  }
+
+  .grid{display:grid;gap:34px;grid-template-columns:repeat(2,1fr);}
+
+  /* ---------- DOSSIER CARD (parchment on navy) ---------- */
+  .dossier{
+    background:var(--parchment);
+    color:var(--ink);
+    position:relative;
+    padding:22px 24px 22px 40px;
+    box-shadow:0 26px 54px -22px rgba(0,0,0,0.65);
+    transition:transform .28s ease, box-shadow .28s ease;
+  }
+  .dossier:hover{
+    transform:translateY(-3px);
+    box-shadow:0 34px 64px -22px rgba(0,0,0,0.72);
+  }
+
+  /* left spine tab carrying the record index, like a filed document */
+  .dossier::before{
+    content:attr(data-index);
+    position:absolute;
+    left:0;top:0;bottom:0;
+    width:22px;
+    background:var(--ink);
+    color:var(--parchment-dim);
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;
+    letter-spacing:0.08em;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    writing-mode:vertical-rl;
+    transform:rotate(180deg);
+  }
+
+  .dossier-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:12px;
+  }
+  .kind-tag{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:9.5px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--brass-dim);
+    border:1px solid rgba(28,33,48,0.28);
+    padding:4px 9px;
+  }
+  .stamp{width:46px;height:46px;flex-shrink:0;}
+  .stamp svg{width:100%;height:100%;}
+  .stamp .stamp-ring{fill:none;stroke:rgba(28,33,48,0.5);stroke-width:1;}
+  .stamp text{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:6px;
+    letter-spacing:2px;
+    fill:rgba(28,33,48,0.55);
+  }
+  .stamp .stamp-check{
+    stroke:var(--brass-dim);
+    stroke-width:2.2;
+    fill:none;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+  }
+
+  .cert-media{
+    margin-top:14px;
+    aspect-ratio:4/3;
+    border:1px solid rgba(28,33,48,0.18);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    color:rgba(28,33,48,0.38);
+    overflow:hidden;
+    position:relative;
+    background:var(--parchment-dim);
+  }
+  .cert-media img{
+    width:100%;height:100%;object-fit:cover;display:block;
+  }
+  .cert-media svg{width:24px;height:24px;opacity:0.5;}
+  .cert-media .ph-label{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px;
+    letter-spacing:0.05em;
+    text-align:center;
+    padding:0 20px;
+  }
+
+  .cert-body{
+    padding-top:16px;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:16px;
+  }
+  .cert-serial{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;
+    letter-spacing:0.08em;
+    color:var(--brass-dim);
+    margin-bottom:7px;
+  }
+  .cert-name{
+    font-family:'Newsreader',serif;
+    font-weight:600;
+    font-size:21px;
+    line-height:1.15;
+    color:var(--ink);
+  }
+  .cert-issuer{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-top:6px;
+  }
+  .cert-date{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;
+    color:var(--ink-soft);
+    white-space:nowrap;
+    text-align:right;
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    padding:56px 0 88px;
+    border-top:1px solid var(--panel-line);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.06em;
+    color:var(--ivory-dim);
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .dossier{transition:none;}
+    html{scroll-behavior:auto;}
+  }
+
+  @media (max-width:760px){
+    .wrap{padding:0 22px;}
+    .grid{grid-template-columns:1fr;}
+    header.hero{grid-template-columns:1fr;padding:72px 0 52px;}
+    .registry-seal{display:none;}
+    .ledger-count{flex-wrap:wrap;}
+    .ledger-item{flex:1 1 50%;padding-right:16px;}
+    footer{flex-direction:column;gap:10px;align-items:flex-start;}
+    .dossier{padding-left:34px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="hero-left">
+      <div class="eyebrow">Private registry · maintained 2026</div>
+      <h1 class="title">Certificate<br><em>Registry</em></h1>
+      <p class="subtitle">A filed record of coursework completed and projects delivered — kept as a single source of proof for anyone who asks to see the work.</p>
+
+      <div class="ledger-count">
+        <div class="ledger-item">
+          <div class="ledger-num">06</div>
+          <div class="ledger-label">Course Certificates</div>
+        </div>
+        <div class="ledger-item">
+          <div class="ledger-num">02</div>
+          <div class="ledger-label">Project Certificates</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="registry-seal" aria-hidden="true">
+      <svg viewBox="0 0 132 132">
+        <circle class="ring" cx="66" cy="66" r="60"/>
+        <circle class="ring-dash" cx="66" cy="66" r="50"/>
+        <path id="heroring" d="M 66,16 A 50,50 0 1 1 65.9,16" fill="none"/>
+        <text><textPath href="#heroring" startOffset="2">ON FILE · AUTHENTICATED ·</textPath></text>
+        <text class="seal-mark" x="66" y="72" text-anchor="middle">CR</text>
+      </svg>
+    </div>
+  </header>
+
+  <!-- ================= COURSES ================= -->
+  <section class="section">
+    <div class="section-head">
+      <span class="part">Part I</span>
+      <h2>Coursework</h2>
+      <div class="count">06 records</div>
+    </div>
+
+    <div class="grid courses">
+
+      <!-- Course 1 — replace .cert-media inner img src with your file -->
+      <article class="dossier" data-index="C·01">
+        <div class="dossier-top">
+          <span class="kind-tag">Course</span>
+          <div class="stamp">
+            <svg viewBox="0 0 60 60">
+              <circle class="stamp-ring" cx="30" cy="30" r="27"/>
+              <circle class="stamp-ring" cx="30" cy="30" r="22"/>
+              <path id="ringpath1" d="M 30,8 A 22,22 0 1 1 29.9,8" fill="none"/>
+              <text><textPath href="#ringpath1" startOffset="2">VERIFIED · CERTIFIED ·</textPath></text>
+              <polyline class="stamp-check" points="22,30 28,36 39,23"/>
+            </svg>
+          </div>
+        </div>
+        <div class="cert-media">
+          <img src="Vlsi design with ai.png" alt="image name">
+        </div>
+        <div class="cert-body">
+          <div>
+            <div class="cert-serial">No. C-001</div>
+            <div class="cert-name">VLSI DESIGN WITH AI</div>
+            <div class="cert-issuer">Internshala</div>
+          </div>
+          <div class="cert-date">07 2026</div>
+        </div>
+      </article>
+
+      <!-- Course 2 -->
+      <article class="dossier" data-index="C·02">
+        <div class="dossier-top">
+          <span class="kind-tag">Course</span>
+          <div class="stamp">
+            <svg viewBox="0 0 60 60">
+              <circle class="stamp-ring" cx="30" cy="30" r="27"/>
+              <circle class="stamp-ring" cx="30" cy="30" r="22"/>
+              <path id="ringpath2" d="M 30,8 A 22,22 0 1 1 29.9,8" fill="none"/>
+              <text><textPath href="#ringpath2" startOffset="2">VERIFIED · CERTIFIED ·</textPath></text>
+              <polyline class="stamp-check" points="22,30 28,36 39,23"/>
+            </svg>
+          </div>
+        </div>
+        <div class="cert-media">
+          <img src="Zenyth Line Following Robert Race.jpeg" alt="image name">
+        </div>
+        <div class="cert-body">
+          <div>
+            <div class="cert-serial">No. C-002</div>
+            <div class="cert-name">Line Following Robert Race</div>
+            <div class="cert-issuer">Thiyakarajar College Of Engineering Zenyth</div>
+          </div>
+          <div class="cert-date">03 2026</div>
+        </div>
+      </article>
+
+      <!-- Course 3 -->
+      <article class="dossier" data-index="C·03">
+        <div class="dossier-top">
+          <span class="kind-tag">Course</span>
+          <div class="stamp">
+            <svg viewBox="0 0 60 60">
+              <circle class="stamp-ring" cx="30" cy="30" r="27"/>
+              <circle class="stamp-ring" cx="30" cy="30" r="22"/>
+              <path id="ringpath3" d="M 30,8 A 22,22 0 1 1 29.9,8" fill="none"/>
+              <text><textPath href="#ringpath3" startOffset="2">VERIFIED · CERTIFIED ·</textPath></text>
+              <polyline class="stamp-check" points="22,30 28,36 39,23"/>
+            </svg>
+          </div>
+        </div>
+        <div class="cert-media">
+          <img src="Java Programming.jpeg" alt="image name">
+        </div>
+        <div class="cert-body">
+          <div>
+            <div class="cert-serial">No. C-003</div>
+            <div class="cert-name">Java Programming</div>
+            <div class="cert-issuer">SSI Education</div>
+          </div>
+          <div class="cert-date">12 2025</div>
+        </div>
+      </article>
+
+      <!-- Course 4 -->
+      <article class="dossier" data-index="C·04">
+        <div class="dossier-top">
+          <span class="kind-tag">Course</span>
+          <div class="stamp">
+            <svg viewBox="0 0 60 60">
+              <circle class="stamp-ring" cx="30" cy="30" r="27"/>
+              <circle class="stamp-ring" cx="30" cy="30" r="22"/>
+              <path id="ringpath4" d="M 30,8 A 22,22 0 1 1 29.9,8" fill="none"/>
+              <text><textPath href="#ringpath4" startOffset="2">VERIFIED · CERTIFIED ·</textPath></text>
+              <polyline class="stamp-check" points="22,30 28,36 39,23"/>
+            </svg>
+          </div>
+        </div>
+        <div class="cert-media">
+          <img src="course-4.jpg" alt="image name">
+        </div>
+        <div class="cert-body">
+          <div>
+            <div class="cert-serial">No. C-004</div>
+            <div class="cert-name">Course Title</div>
+            <div class="cert-issuer">Issuing Platform</div>
+          </div>
+          <div class="cert-date">Month Year</div>
+        </div>
+      </article>
+
+      
+
+    </div>
+  </section>
+
+  <!-- ================= PROJECTS ================= -->
+  <section class="section" style="padding-top:0;">
+    <div class="section-head">
+      <span class="part">Part II</span>
+      <h2>Projects</h2>
+      <div class="count">02 records</div>
+    </div>
+
+    <div class="grid projects">
+
+      <!-- Project 1 -->
+      <article class="dossier" data-index="P·01">
+        <div class="dossier-top">
+          <span class="kind-tag">Project</span>
+          <div class="stamp">
+            <svg viewBox="0 0 60 60">
+              <circle class="stamp-ring" cx="30" cy="30" r="27"/>
+              <circle class="stamp-ring" cx="30" cy="30" r="22"/>
+              <path id="ringpath5" d="M 30,8 A 22,22 0 1 1 29.9,8" fill="none"/>
+              <text><textPath href="#ringpath5" startOffset="2">VERIFIED · CERTIFIED ·</textPath></text>
+              <polyline class="stamp-check" points="22,30 28,36 39,23"/>
+            </svg>
+          </div>
+        </div>
+        <div class="cert-media">
+          <img src="zenyth.jpeg" alt="image name">
+        </div>
+        <div class="cert-body">
+          <div>
+            <div class="cert-serial">No. P-001</div>
+            <div class="cert-name">ZENYTH — LINE FOLLOWER</div>
+            <div class="cert-issuer">Thiagarajar College</div>
+          </div>
+          <div class="cert-date">2026</div>
+        </div>
+      </article>
+
+      <!-- Project 2 -->
+      <article class="dossier" data-index="P·02">
+        <div class="dossier-top">
+          <span class="kind-tag">Project</span>
+          <div class="stamp">
+            <svg viewBox="0 0 60 60">
+              <circle class="stamp-ring" cx="30" cy="30" r="27"/>
+              <circle class="stamp-ring" cx="30" cy="30" r="22"/>
+              <path id="ringpath6" d="M 30,8 A 22,22 0 1 1 29.9,8" fill="none"/>
+              <text><textPath href="#ringpath6" startOffset="2">VERIFIED · CERTIFIED ·</textPath></text>
+              <polyline class="stamp-check" points="22,30 28,36 39,23"/>
+            </svg>
+          </div>
+        </div>
+        <div class="cert-media">
+          <img src="project-2.jpg" alt="image name">
+        </div>
+        <div class="cert-body">
+          <div>
+            <div class="cert-serial">No. P-002</div>
+            <div class="cert-name">Project Title</div>
+            <div class="cert-issuer">Issuing Organization</div>
+          </div>
+          <div class="cert-date">Month Year</div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <footer>
+    <div>© 2026 · Certificate Registry</div>
+    <div>Records on file: 08 total</div>
+  </footer>
+
+</div>
+</body>
+</html>
